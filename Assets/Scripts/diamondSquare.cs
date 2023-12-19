@@ -8,8 +8,9 @@ using UnityEngine;
 
 public class diamondSquare : MonoBehaviour
 {
-    private float sideSize;
     public float height = 5f;
+    [Range(0f, 1f)] public float smoothness;
+    private float sideSize;
     Mesh mesh;
     Vector3[] vertices;
     int maximumIndexCoordinate = 0;
@@ -86,9 +87,6 @@ public class diamondSquare : MonoBehaviour
         vertices[calculateIndex(0,maximumIndexCoordinate)].y = h3;
         float h4 = Random.Range(0, height);
         vertices[calculateIndex(maximumIndexCoordinate,maximumIndexCoordinate)].y = h4;
-
-
-
         int iteration = 1;
         PerformDiamondStep(0, 0, maximumIndexCoordinate, maximumIndexCoordinate,iteration);
 
@@ -104,7 +102,7 @@ public class diamondSquare : MonoBehaviour
         }
         int middleX = x1 + ((x2 - x1) / 2);
         int middleY = y1 + ((y2 - y1) / 2);
-        vertices[calculateIndex(middleX, middleY)].y = DiamondAverage(x1,y1,x2,y2) + (Random.Range(0f,1f)*Mathf.Pow(2,-(1/iteration)));
+        vertices[calculateIndex(middleX, middleY)].y = DiamondAverage(x1,y1,x2,y2) + (Random.Range(0f,1f)*Mathf.Pow(2,-smoothness));
         PerformSquareStep(middleX, middleY,x1,y1,x2,y2, iteration);
     }
 
@@ -113,11 +111,11 @@ public class diamondSquare : MonoBehaviour
     {
         int dist = middleX - x1;
         //set vertices with same X coordinate
-        vertices[calculateIndex(middleX,y1)].y = SquareAverage(middleX, y1, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -(1 / iteration)));
-        vertices[calculateIndex(middleX,y2)].y = SquareAverage(middleX, y2, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -(1 / iteration)));
+        vertices[calculateIndex(middleX,y1)].y = SquareAverage(middleX, y1, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -smoothness));
+        vertices[calculateIndex(middleX,y2)].y = SquareAverage(middleX, y2, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -smoothness));
         //set vertices with same Y coordinate
-        vertices[calculateIndex(x1,middleY)].y = SquareAverage(x1, middleY, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -(1 / iteration)));
-        vertices[calculateIndex(x2,middleY)].y = SquareAverage(x2, middleY, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -(1 / iteration)));
+        vertices[calculateIndex(x1,middleY)].y = SquareAverage(x1, middleY, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -smoothness));
+        vertices[calculateIndex(x2,middleY)].y = SquareAverage(x2, middleY, dist) + (Random.Range(0f, 1f) * Mathf.Pow(2, -smoothness));
 
         iteration++;
         PerformDiamondStep(x1, y1, middleX, middleY, iteration);
@@ -125,5 +123,4 @@ public class diamondSquare : MonoBehaviour
         PerformDiamondStep(x1, middleY, middleX, y2, iteration);
         PerformDiamondStep(middleX, y1, x2, middleY, iteration);
     }
-
 }
