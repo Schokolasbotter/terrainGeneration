@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class GenerateMesh : MonoBehaviour
 {
-    public int xSize;
-    public int ySize;
+    [Header("2^N + 1")]
+    public int N;
+    private int xSize,ySize;
 
     private Mesh mesh;
     private Vector3[] vertices;
@@ -14,6 +15,7 @@ public class GenerateMesh : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        xSize = ySize = (int)Mathf.Pow(2,N)+1;
         Generate();
     }
 
@@ -22,37 +24,37 @@ public class GenerateMesh : MonoBehaviour
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         mesh.name = "Plane2";
 
-        vertices = new Vector3[(xSize+1) * (ySize+1)];
+        vertices = new Vector3[xSize * ySize];
 
-        for(int i = 0, y=0; y<=ySize; y++)
+        for(int i = 0, y=0; y<ySize; y++)
         {
-            for (int x = 0; x <= xSize; x++, i++)
+            for (int x = 0; x < xSize; x++, i++)
             {
                 vertices[i] = new Vector3(x, 0, y);
             }
         }
 
         mesh.vertices = vertices;
+        int[] triangles = new int[xSize * (ySize-1) * 6];
 
-        int[] triangles = new int[xSize * ySize * 6];
-
-        for (int ti = 0, vi = 0, y = 0; y < ySize; y++, vi++)
+        for (int ti = 0, vi = 0, y = 0; y < (ySize-1); y++, vi++)
         {
-            for (int x = 0; x < xSize; x++, ti += 6, vi++)
+            for (int x = 0; x < (xSize-1); x++, ti += 6, vi++)
             {
                 triangles[ti] = vi;
                 triangles[ti + 3] = triangles[ti + 2] = vi + 1;
-                triangles[ti + 4] = triangles[ti + 1] = vi + xSize + 1;
-                triangles[ti + 5] = vi + xSize + 2;
+                triangles[ti + 4] = triangles[ti + 1] = vi + (xSize-1) + 1;
+                triangles[ti + 5] = vi + (xSize-1) + 2;
             }
         }
 
         Vector2[] uvs = new Vector2[vertices.Length];
-        for (int x=0,i=0; x<=xSize; x++)
+        for (int x=0,i=0; x<xSize; x++)
         {
-            for(int y=0;y<=ySize;y++,i++)
+            for(int y=0;y<ySize;y++,i++)
             {
-                uvs[i] = new Vector2((float)x / (xSize + 1), (float)y / (ySize + 1));
+                
+                uvs[i] = new Vector2((float)x / (xSize), (float)y / (ySize));
 
             }
         }
