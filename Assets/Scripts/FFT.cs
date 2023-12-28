@@ -11,7 +11,7 @@ public class FFT : MonoBehaviour
     public Texture2D texture;
     private Vector3[] originalVertices, displacedVertices;
     private Vector2[] uvCoordinates;
-
+    public float filter;
 
     [Header("NoiseSettings")]
     private int Size = 128;
@@ -20,6 +20,7 @@ public class FFT : MonoBehaviour
 
     public float heightMult = 1;
     public float noiseScale;
+    public float noiseScale2;
 
     public float[] newVertexHeights;
     // Start is called before the first frame update
@@ -31,38 +32,37 @@ public class FFT : MonoBehaviour
         originalVertices = TerrainMesh.vertices;
         uvCoordinates = TerrainMesh.uv;
         displacedVertices = new Vector3[originalVertices.Length];
-
-        squareMeshSize = Mathf.Sqrt(TerrainMesh.vertexCount);
-
-        Numerics.Complex[,] complex = FourierTransform();
-        complex = ApplyFilter(complex, 0.1f);
-        Numerics.Complex[,] inversedComplex = ApplyInverseFastFourierTransform(complex);
-        newVertexHeights = ComplexToDouble(inversedComplex);
-
-
-        for (int i = 0; i < originalVertices.Length; i++)
-        {
-            float height = (float)newVertexHeights[i];
-            displacedVertices[i] = originalVertices[i] + Vector3.up * height * heightMult;
-        }
-        TerrainMesh.vertices = displacedVertices;
-        TerrainMesh.RecalculateNormals();
-
         
+                squareMeshSize = Mathf.Sqrt(TerrainMesh.vertexCount);
 
-        Texture2D outputTexture = DoubleArrayToTexture2D(newVertexHeights, (int)squareMeshSize);
+                Numerics.Complex[,] complex = FourierTransform();
+                complex = ApplyFilter(complex, filter);
+                Numerics.Complex[,] inversedComplex = ApplyInverseFastFourierTransform(complex);
+                newVertexHeights = ComplexToDouble(inversedComplex);
 
 
+                for (int i = 0; i < originalVertices.Length; i++)
+                {
+                    float height = (float)newVertexHeights[i];
+                    displacedVertices[i] = originalVertices[i] + Vector3.up * height * heightMult;
+                }
+                TerrainMesh.vertices = displacedVertices;
+                TerrainMesh.RecalculateNormals();
+        
         // Create a new material
+        
+    }
+
+    private void Update()
+    {
+       // GenerateNoise();
+        /*
         Material noiseMaterial = new Material(Shader.Find("Standard"));
-        noiseMaterial.SetTexture("_MainTex", outputTexture);
+        noiseMaterial.SetTexture("_MainTex", texture);
 
         // Apply the material to the GameObject's Renderer
         Renderer renderer = GetComponent<Renderer>();
-        renderer.material = noiseMaterial;
-
-
-      //  print(uvCoordinates.Length);
+        renderer.material = noiseMaterial; */
     }
 
     private void GenerateNoise()
@@ -73,38 +73,16 @@ public class FFT : MonoBehaviour
         {
             for (int y = 0; y < Size; y++)
             {
-                float sample = Mathf.PerlinNoise((float)x*noiseScale, (float)y*noiseScale);
-                Color color = new Color(sample,sample,sample);
+                float sample1 = Mathf.PerlinNoise(noiseScale * (float)x/Size,noiseScale * (float)y/Size );
+                float sample2 = Mathf.PerlinNoise(2435.3426f + noiseScale2 * (float)x/Size, 159232.766f + noiseScale2 * (float)y/Size );
+                float sample3 = sample1 * sample2;
+                Color color = new Color(sample3,sample3,sample3);
                 texture.SetPixel(x, y, color);
             }
         }
 
         texture.Apply();
     }
-
-
-    Texture2D DoubleArrayToTexture2D(float[] data, int size)
-    {
-        Texture2D texture = new Texture2D(size, size);
-
-        for (int i = 0; i < data.Length; i++)
-        {
-            int x = i % size;
-            int y = i / size;
-            float value = data[i];
-
-            // Normalize or scale value to [0, 1] if necessary
-            // value = Mathf.Clamp01(value); // Uncomment this line if needed
-
-            Color color = new Color(value, value, value); // Create grayscale color
-            texture.SetPixel(x, y, color);
-        }
-
-        texture.Apply();
-        return texture;
-    }
-
-
 
     private Numerics.Complex[,] FourierTransform()
     {
@@ -168,6 +146,10 @@ public class FFT : MonoBehaviour
 
         (the double summation is represented with a nested loop)
         
+
+        Since this is a direct implementation of the DFT algorithm, the time complexity is O(n) 
+
+
         */
 
         double n = squareMeshSize;
