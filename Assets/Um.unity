@@ -346,7 +346,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7b4664894dc0584eb97c538180987c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  N: 6
+  N: 2
 --- !u!23 &1580090766
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -438,8 +438,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 929b1ed1359a7cc4783bd83a72383986, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 50
-  smoothness: 1
+  height: 20
+  smoothness: 0.95
 --- !u!1 &2100899697
 GameObject:
   m_ObjectHideFlags: 0
