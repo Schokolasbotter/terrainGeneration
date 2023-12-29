@@ -13,6 +13,7 @@ public class diamondSquare : MonoBehaviour
     private float sideSize;
     Mesh mesh;
     Vector3[] vertices;
+    public float[] heightmap;
     int maximumIndexCoordinate = 0;
 
     // Start is called before the first frame update
@@ -22,14 +23,9 @@ public class diamondSquare : MonoBehaviour
         sideSize = Mathf.Sqrt(mesh.vertices.Length);
         maximumIndexCoordinate = (int)sideSize - 1;
         vertices = mesh.vertices;
+        heightmap = new float[vertices.Length];
 
-        Debug.Log(mesh.bounds.size);
         performDiamondSquare2(smoothness);
-
-        //Rewrite Vertices
-        mesh.vertices = vertices; //Overwrite Vertices
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
     }
 
     private int calculateIndex(int xCoord, int yCoord) 
@@ -40,10 +36,10 @@ public class diamondSquare : MonoBehaviour
     private float DiamondAverage(int x1,int y1, int x2, int y2)
     {
         float averageValue = 0;
-        averageValue += vertices[calculateIndex(x1, y1)].y;
-        averageValue += vertices[calculateIndex(x1, y2)].y;
-        averageValue += vertices[calculateIndex(x2, y1)].y;
-        averageValue += vertices[calculateIndex(x2, y2)].y;
+        averageValue += heightmap[calculateIndex(x1, y1)];
+        averageValue += heightmap[calculateIndex(x1, y2)];
+        averageValue += heightmap[calculateIndex(x2, y1)];
+        averageValue += heightmap[calculateIndex(x2, y2)];
         averageValue /= 4f;
         return averageValue;
     }
@@ -53,22 +49,22 @@ public class diamondSquare : MonoBehaviour
         float averageValue = 0;
         float valueCounter = 0;
         if (x + dist <= maximumIndexCoordinate) {
-            averageValue += vertices[calculateIndex(x + dist, y)].y;
+            averageValue += heightmap[calculateIndex(x + dist, y)];
             valueCounter++;
         }
         if(x- dist >= 0)
         {
-            averageValue += vertices[calculateIndex(x - dist, y)].y;
+            averageValue += heightmap[calculateIndex(x - dist, y)];
             valueCounter++;
         }
         if (y - dist >= 0)
         {
-            averageValue += vertices[calculateIndex(x, y - dist)].y;
+            averageValue += heightmap[calculateIndex(x, y - dist)];
             valueCounter++;
         }
         if (y + dist <= maximumIndexCoordinate)
         {
-            averageValue += vertices[calculateIndex(x, y + dist)].y;
+            averageValue += heightmap[calculateIndex(x, y + dist)];
             valueCounter++;
         }   
         averageValue /= valueCounter;
@@ -81,16 +77,18 @@ public class diamondSquare : MonoBehaviour
         //Initial Corners
         
         float h1 = Random.Range(0, height);
-        vertices[calculateIndex(0, 0)].y = h1;
+        heightmap[calculateIndex(0, 0)] = h1;
         float h2 = Random.Range(0, height);
-        vertices[calculateIndex(maximumIndexCoordinate,0)].y = h2;
+        heightmap[calculateIndex(maximumIndexCoordinate,0)] = h2;
         float h3 = Random.Range(0, height);
-        vertices[calculateIndex(0,maximumIndexCoordinate)].y = h3;
+        heightmap[calculateIndex(0,maximumIndexCoordinate)] = h3;
         float h4 = Random.Range(0, height);
-        vertices[calculateIndex(maximumIndexCoordinate,maximumIndexCoordinate)].y = h4;
+        heightmap[calculateIndex(maximumIndexCoordinate,maximumIndexCoordinate)] = h4;
         int iteration = 1;
         PerformDiamondStep(0, 0, maximumIndexCoordinate, maximumIndexCoordinate,iteration);
     }
+
+    //Adjusted OGDEV
     private void performDiamondSquare2(float Roughness) 
     { 
         int rectSize = (int)mesh.bounds.size.x;
@@ -102,14 +100,12 @@ public class diamondSquare : MonoBehaviour
         {
             for (int x = 0; x <= mesh.bounds.size.x; x += rectSize)
             {
-                //Debug.Log("St starting Value at X: " + x + " Z: " + z);
-                //vertices[calculateIndex(x, z)].y = Random.Range(-currentHeight, currentHeight);
+                //heightmap[calculateIndex(x, z)].y = Random.Range(-currentHeight, currentHeight);
             }
         }
-                int i = 0;
+        int i = 0;
         while (rectSize > 1)
         {
-            Debug.Log("Iteration : " + i);
             i++;
             //DiamondStep
             DiamondStep(rectSize, currentHeight);
@@ -140,18 +136,17 @@ public class diamondSquare : MonoBehaviour
                     next_z = (int)mesh.bounds.size.z - 1;
                 }
 
-                float topLeft = vertices[calculateIndex(x, z)].y;
-                float topRight = vertices[calculateIndex(next_x, z)].y;
-                float bottomLeft = vertices[calculateIndex(x, next_z)].y;
-                float bottomRight = vertices[calculateIndex(next_x, next_z)].y;
+                float topLeft = heightmap[calculateIndex(x, z)];
+                float topRight = heightmap[calculateIndex(next_x, z)];
+                float bottomLeft = heightmap[calculateIndex(x, next_z)];
+                float bottomRight = heightmap[calculateIndex(next_x, next_z)];
 
                 int mid_x = x + halfRectSize;
                 int mid_z = z + halfRectSize;
 
                 float randValue = Random.Range(CurHeight, -CurHeight);
                 float midPoint = (topLeft + topRight + bottomLeft + bottomRight) / 4.0f;
-                Debug.Log("Change MidPoint at X: " + mid_x + " Z: " + mid_z);
-                vertices[calculateIndex(mid_x, mid_z)].y = midPoint + randValue;
+                heightmap[calculateIndex(mid_x, mid_z)] = midPoint + randValue;
             }
         }
     }
@@ -164,7 +159,6 @@ public class diamondSquare : MonoBehaviour
         {
             for (int x = 0; x < mesh.bounds.size.x; x += RectSize)
             {
-                Debug.Log("Z: " + z + " X: " + x);
                 int next_x = (x + RectSize) % (int)mesh.bounds.size.x;
                 int next_z = (z + RectSize) % (int)mesh.bounds.size.z;
 
@@ -174,40 +168,36 @@ public class diamondSquare : MonoBehaviour
                 int prev_mid_x = (x-halfRectSize + (int)mesh.bounds.size.x) % (int)mesh.bounds.size.x;
                 int prev_mid_z = (z-halfRectSize + (int)mesh.bounds.size.z) % (int)mesh.bounds.size.z;
 
-                float CurTopLeft = vertices[calculateIndex(x, z)].y;
-                float CurTopRight = vertices[calculateIndex(next_x, z)].y;
-                float CurCenter = vertices[calculateIndex(mid_x,mid_z)].y;
-                float prevZCenter = vertices[calculateIndex(mid_x, prev_mid_z)].y;
-                float curBotLeft = vertices[calculateIndex(x, next_z)].y;
-                float prevXCenter = vertices[calculateIndex(prev_mid_x, mid_z)].y;
+                float CurTopLeft = heightmap[calculateIndex(x, z)];
+                float CurTopRight = heightmap[calculateIndex(next_x, z)];
+                float CurCenter = heightmap[calculateIndex(mid_x,mid_z)];
+                float prevZCenter = heightmap[calculateIndex(mid_x, prev_mid_z)];
+                float curBotLeft = heightmap[calculateIndex(x, next_z)];
+                float prevXCenter = heightmap[calculateIndex(prev_mid_x, mid_z)];
 
                 float CurLeftMid = (CurTopLeft + CurCenter + curBotLeft + prevXCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
                 float CurTopMid = (CurTopLeft + CurCenter + CurTopRight + prevZCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
 
-                Debug.Log("Change Vertex at X: " + mid_x + " Z: " + z);
-                vertices[calculateIndex(mid_x,z)].y = CurTopMid;
-                Debug.Log("Change Vertex at X: " + x + " Z: " + mid_z);
-                vertices[calculateIndex(x,mid_z)].y = CurLeftMid;
+                heightmap[calculateIndex(mid_x,z)]= CurTopMid;
+                heightmap[calculateIndex(x,mid_z)] = CurLeftMid;
                 
                 if(x == 0)
                 {
-                    float nextHoriz = vertices[calculateIndex(((int)mesh.bounds.size.x + halfRectSize)% (int)mesh.bounds.size.x, z)].y;
-                    float prevHoriz = vertices[calculateIndex(((int)mesh.bounds.size.x - halfRectSize)% (int)mesh.bounds.size.x, z)].y;
-                    float nextVert =  vertices[calculateIndex((int)mesh.bounds.size.x, (mid_z + halfRectSize) % (int)mesh.bounds.size.z)].y;
-                    float prevVert =  vertices[calculateIndex((int)mesh.bounds.size.x, (mid_z - halfRectSize) % (int)mesh.bounds.size.z)].y;
+                    float nextHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x + halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float prevHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x - halfRectSize)% (int)mesh.bounds.size.x, z)];
+                    float nextVert =  heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z + halfRectSize) % (int)mesh.bounds.size.z)];
+                    float prevVert =  heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z - halfRectSize) % (int)mesh.bounds.size.z)];
                     float borderAverage =  (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);                                            
-                    Debug.Log("Change Vertex at X: " + (int)mesh.bounds.size.x + " Z: " + mid_z);
-                    vertices[calculateIndex((int)mesh.bounds.size.x, mid_z)].y = borderAverage;
+                    heightmap[calculateIndex((int)mesh.bounds.size.x, mid_z)] = borderAverage;
                 }
                 if(z == 0)
                 {
-                    float nextHoriz = vertices[calculateIndex((mid_x + halfRectSize) % (int)mesh.bounds.size.x, z)].y;
-                    float prevHoriz = vertices[calculateIndex((mid_x - halfRectSize) % (int)mesh.bounds.size.x, z)].y;
-                    float nextVert = vertices[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z + halfRectSize) % (int)mesh.bounds.size.z)].y;
-                    float prevVert = vertices[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z - halfRectSize) % (int)mesh.bounds.size.z)].y;
+                    float nextHoriz = heightmap[calculateIndex((mid_x + halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float prevHoriz = heightmap[calculateIndex((mid_x - halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float nextVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z + halfRectSize) % (int)mesh.bounds.size.z)];
+                    float prevVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z - halfRectSize) % (int)mesh.bounds.size.z)];
                     float borderAverage = (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);
-                    Debug.Log("Change Vertex at X: " + mid_x + " Z: " + (int)mesh.bounds.size.z);
-                    vertices[calculateIndex(mid_x, (int)mesh.bounds.size.z)].y = borderAverage + Random.Range(-CurHeight, CurHeight);
+                    heightmap[calculateIndex(mid_x, (int)mesh.bounds.size.z)] = borderAverage + Random.Range(-CurHeight, CurHeight);
                 }
             }
         }
@@ -223,7 +213,7 @@ public class diamondSquare : MonoBehaviour
         }
         int middleX = x1 + ((x2 - x1) / 2);
         int middleY = y1 + ((y2 - y1) / 2);
-        vertices[calculateIndex(middleX, middleY)].y = DiamondAverage(x1,y1,x2,y2) + (Random.Range(-halfRectagleSize,halfRectagleSize)*Mathf.Pow(2,-smoothness));
+        heightmap[calculateIndex(middleX, middleY)] = DiamondAverage(x1,y1,x2,y2) + (Random.Range(-halfRectagleSize,halfRectagleSize)*Mathf.Pow(2,-smoothness));
         PerformSquareStep(middleX, middleY,x1,y1,x2,y2, iteration);
     }
 
@@ -231,12 +221,12 @@ public class diamondSquare : MonoBehaviour
     private void PerformSquareStep(int middleX, int middleY, int x1, int y1, int x2, int y2, int iteration)
     {
         int dist = middleX - x1;
-        //set vertices with same X coordinate
-        vertices[calculateIndex(middleX,y1)].y = SquareAverage(middleX, y1, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        vertices[calculateIndex(middleX,y2)].y = SquareAverage(middleX, y2, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        //set vertices with same Y coordinate
-        vertices[calculateIndex(x1,middleY)].y = SquareAverage(x1, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        vertices[calculateIndex(x2,middleY)].y = SquareAverage(x2, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        //set heightmap with same X coordinate
+        heightmap[calculateIndex(middleX,y1)] = SquareAverage(middleX, y1, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        heightmap[calculateIndex(middleX,y2)] = SquareAverage(middleX, y2, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        //set heightmap with same Y coordinate
+        heightmap[calculateIndex(x1,middleY)] = SquareAverage(x1, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        heightmap[calculateIndex(x2,middleY)]= SquareAverage(x2, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
 
         iteration++;
         PerformDiamondStep(x1, y1, middleX, middleY, iteration);
