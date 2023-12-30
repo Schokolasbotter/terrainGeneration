@@ -21,7 +21,6 @@ public class diamondSquare : MonoBehaviour
     {
         mesh = GetComponent<MeshFilter>().mesh;
         sideSize = Mathf.Sqrt(mesh.vertices.Length);
-        Debug.Log("SideSize: " + sideSize);
         maximumIndexCoordinate = (int)sideSize - 1;
         vertices = mesh.vertices;
         heightmap = new float[vertices.Length];
@@ -171,9 +170,6 @@ public class diamondSquare : MonoBehaviour
                 float topRight = heightmap[calculateIndex(nextX,y)];
                 float bottomLeft = heightmap[calculateIndex(x, nextY)];
                 float bottomRight = heightmap[calculateIndex(nextX, nextY)];
-
-                Debug.Log("x: " + x + " y: " + y);
-                //Debug.Log(calculateIndex(middleX, middleY));
                 heightmap[calculateIndex(middleX, middleY)] = (topLeft + topRight + bottomLeft + bottomRight)/4.0f + (Random.Range(-height, height) );
             }
 
