@@ -21,57 +21,25 @@ public class diamondSquare : MonoBehaviour
     {
         mesh = GetComponent<MeshFilter>().mesh;
         sideSize = Mathf.Sqrt(mesh.vertices.Length);
+        Debug.Log("SideSize: " + sideSize);
         maximumIndexCoordinate = (int)sideSize - 1;
         vertices = mesh.vertices;
         heightmap = new float[vertices.Length];
 
-        performDiamondSquare2(smoothness);
+        performDiamondSquareV2();
     }
 
+    
     private int calculateIndex(int xCoord, int yCoord) 
     {
         return (yCoord * (int)sideSize + xCoord);
     }
 
-    private float DiamondAverage(int x1,int y1, int x2, int y2)
-    {
-        float averageValue = 0;
-        averageValue += heightmap[calculateIndex(x1, y1)];
-        averageValue += heightmap[calculateIndex(x1, y2)];
-        averageValue += heightmap[calculateIndex(x2, y1)];
-        averageValue += heightmap[calculateIndex(x2, y2)];
-        averageValue /= 4f;
-        return averageValue;
-    }
-
-    private float SquareAverage(int x, int y, int dist) 
-    {
-        float averageValue = 0;
-        float valueCounter = 0;
-        if (x + dist <= maximumIndexCoordinate) {
-            averageValue += heightmap[calculateIndex(x + dist, y)];
-            valueCounter++;
-        }
-        if(x- dist >= 0)
-        {
-            averageValue += heightmap[calculateIndex(x - dist, y)];
-            valueCounter++;
-        }
-        if (y - dist >= 0)
-        {
-            averageValue += heightmap[calculateIndex(x, y - dist)];
-            valueCounter++;
-        }
-        if (y + dist <= maximumIndexCoordinate)
-        {
-            averageValue += heightmap[calculateIndex(x, y + dist)];
-            valueCounter++;
-        }   
-        averageValue /= valueCounter;
-        return averageValue;
-    }
-
-
+    //---------------
+    //Self Written - Version 1
+    //---------------
+    #region
+    
     private void performDiamondSquare() 
     {
         //Initial Corners
@@ -88,7 +56,189 @@ public class diamondSquare : MonoBehaviour
         PerformDiamondStep(0, 0, maximumIndexCoordinate, maximumIndexCoordinate,iteration);
     }
 
+    //Diamond Step
+    private void PerformDiamondStep(int x1, int y1, int x2, int y2, int iteration)
+    {
+        float halfRectangleSize = (x2 - x1) / 2;
+        if (halfRectangleSize < 1)
+        {
+            return;
+        }
+        int middleX = x1 + ((x2 - x1) / 2);
+        int middleY = y1 + ((y2 - y1) / 2);
+        heightmap[calculateIndex(middleX, middleY)] = DiamondAverage(x1, y1, x2, y2) + (Random.Range(-halfRectangleSize, halfRectangleSize) * Mathf.Pow(2, -smoothness));
+        PerformSquareStep(middleX, middleY, x1, y1, x2, y2, iteration);
+    }
+
+    //Square Step
+    private void PerformSquareStep(int middleX, int middleY, int x1, int y1, int x2, int y2, int iteration)
+    {
+        int dist = middleX - x1;
+        //set heightmap with same X coordinate
+        heightmap[calculateIndex(middleX, y1)] = SquareAverage(middleX, y1, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        heightmap[calculateIndex(middleX, y2)] = SquareAverage(middleX, y2, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        //set heightmap with same Y coordinate
+        heightmap[calculateIndex(x1, middleY)] = SquareAverage(x1, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+        heightmap[calculateIndex(x2, middleY)] = SquareAverage(x2, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
+
+        iteration++;
+        PerformDiamondStep(x1, y1, middleX, middleY, iteration);
+        PerformDiamondStep(middleX, middleY, x2, y2, iteration);
+        PerformDiamondStep(x1, middleY, middleX, y2, iteration);
+        PerformDiamondStep(middleX, y1, x2, middleY, iteration);
+    }
+    private float DiamondAverage(int x1, int y1, int x2, int y2)
+    {
+        float averageValue = 0;
+        averageValue += heightmap[calculateIndex(x1, y1)];
+        averageValue += heightmap[calculateIndex(x1, y2)];
+        averageValue += heightmap[calculateIndex(x2, y1)];
+        averageValue += heightmap[calculateIndex(x2, y2)];
+        averageValue /= 4f;
+        return averageValue;
+    }
+
+    private float SquareAverage(int x, int y, int dist)
+    {
+        float averageValue = 0;
+        float valueCounter = 0;
+        if (x + dist <= maximumIndexCoordinate)
+        {
+            averageValue += heightmap[calculateIndex(x + dist, y)];
+            valueCounter++;
+        }
+        if (x - dist >= 0)
+        {
+            averageValue += heightmap[calculateIndex(x - dist, y)];
+            valueCounter++;
+        }
+        if (y - dist >= 0)
+        {
+            averageValue += heightmap[calculateIndex(x, y - dist)];
+            valueCounter++;
+        }
+        if (y + dist <= maximumIndexCoordinate)
+        {
+            averageValue += heightmap[calculateIndex(x, y + dist)];
+            valueCounter++;
+        }
+        averageValue /= valueCounter;
+        return averageValue;
+    }
+    #endregion
+    //---------------
+    //Self Written - Version 2
+    //---------------
+    #region
+
+    private void performDiamondSquareV2()
+    {
+        //Initial Corners
+
+        float h1 = Random.Range(-height, height);
+       //heightmap[calculateIndex(0, 0)] = h1;
+        float h2 = Random.Range(-height, height);
+        //heightmap[calculateIndex(maximumIndexCoordinate, 0)] = h2;
+        float h3 = Random.Range(-height, height);
+       // heightmap[calculateIndex(0, maximumIndexCoordinate)] = h3;
+        float h4 = Random.Range(-height, height);
+        //heightmap[calculateIndex(maximumIndexCoordinate, maximumIndexCoordinate)] = h4;
+        float nextHeight = height * Mathf.Pow(2, -smoothness);
+        PerformDiamondStepV2((int)sideSize,nextHeight);
+    }
+
+    //Diamond Step
+    private void PerformDiamondStepV2(int rectangleSize, float height)
+    {
+        float halfRectangleSize = rectangleSize / 2;
+        if (halfRectangleSize < 1)
+        {
+            return;
+        }
+        
+
+        for (int x = 0; x < maximumIndexCoordinate; x += rectangleSize)
+        {
+            for (int y = 0; y < maximumIndexCoordinate; y += rectangleSize)
+            {
+                int nextX = (x + rectangleSize)%(int)sideSize;
+                int nextY = (y + rectangleSize)%(int)sideSize;
+
+                int middleX = x + (int)halfRectangleSize;
+                int middleY = y + (int)halfRectangleSize;
+
+                float topLeft = heightmap[calculateIndex(x, y)];
+                float topRight = heightmap[calculateIndex(nextX,y)];
+                float bottomLeft = heightmap[calculateIndex(x, nextY)];
+                float bottomRight = heightmap[calculateIndex(nextX, nextY)];
+
+                Debug.Log("x: " + x + " y: " + y);
+                //Debug.Log(calculateIndex(middleX, middleY));
+                heightmap[calculateIndex(middleX, middleY)] = (topLeft + topRight + bottomLeft + bottomRight)/4.0f + (Random.Range(-height, height) );
+            }
+
+        }
+        PerformSquareStepV2(rectangleSize, height);
+    }
+
+    //Square Step
+    private void PerformSquareStepV2(int rectangleSize, float height)
+    {
+        float halfRectangleSize = rectangleSize / 2;
+
+        for (int x = 0; x < maximumIndexCoordinate; x += rectangleSize)
+        {
+            for (int y = 0; y < maximumIndexCoordinate; y += rectangleSize)
+            {
+                int middleX = x + (int)halfRectangleSize;
+                int middleY = y + (int)halfRectangleSize;
+
+                //coordinates of target points
+                int lowerY = (middleY - (int)halfRectangleSize) % (int)sideSize;
+                int upperY = (middleY + (int)halfRectangleSize) % (int)sideSize;
+                int lowerX = (middleX - (int)halfRectangleSize) % (int)sideSize;
+                int upperX = (middleX + (int)halfRectangleSize) % (int)sideSize;
+
+                //LowerY
+                float neighbour1 = heightmap[calculateIndex(middleX, (lowerY + (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                float neighbour2 = heightmap[calculateIndex(middleX, (lowerY - (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                float neighbour3 = heightmap[calculateIndex((middleX - (int)halfRectangleSize + (int)sideSize) % (int)sideSize, lowerY)];
+                float neighbour4 = heightmap[calculateIndex((middleX + (int)halfRectangleSize + (int)sideSize) % (int)sideSize, lowerY)];
+                heightmap[calculateIndex(middleX,lowerY)] = (neighbour1+neighbour2 + neighbour3 + neighbour4) / 4.0f + (Random.Range(-height,height));
+
+                //UpperY
+                neighbour1 = heightmap[calculateIndex(middleX, (upperY + (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour2 = heightmap[calculateIndex(middleX, (upperY - (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour3 = heightmap[calculateIndex((middleX - (int)halfRectangleSize + (int)sideSize) % (int)sideSize, upperY)];
+                neighbour4 = heightmap[calculateIndex((middleX + (int)halfRectangleSize + (int)sideSize) % (int)sideSize, upperY)];
+                heightmap[calculateIndex(middleX, upperY)] = (neighbour1 + neighbour2 + neighbour3 + neighbour4) / 4.0f + (Random.Range(-height, height));
+
+                //LowerX
+                neighbour1 = heightmap[calculateIndex(lowerX, (middleY + (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour2 = heightmap[calculateIndex(lowerX, (middleY - (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour3 = heightmap[calculateIndex((lowerX - (int)halfRectangleSize + (int)sideSize) % (int)sideSize, middleY)];
+                neighbour4 = heightmap[calculateIndex((lowerX + (int)halfRectangleSize + (int)sideSize) % (int)sideSize, middleY)];
+                heightmap[calculateIndex(lowerX, middleY)] = (neighbour1 + neighbour2 + neighbour3 + neighbour4) / 4.0f + (Random.Range(-height,height));
+
+                //UpperX
+                neighbour1 = heightmap[calculateIndex(upperX, (middleY + (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour2 = heightmap[calculateIndex(upperX, (middleY - (int)halfRectangleSize + (int)sideSize) % (int)sideSize)];
+                neighbour3 = heightmap[calculateIndex((upperX - (int)halfRectangleSize + (int)sideSize) % (int)sideSize, middleY)];
+                neighbour4 = heightmap[calculateIndex((upperX + (int)halfRectangleSize + (int)sideSize) % (int)sideSize, middleY)];
+                heightmap[calculateIndex(upperX, middleY)] = (neighbour1 + neighbour2 + neighbour3 + neighbour4) / 4.0f + (Random.Range(-height,height));
+            }
+        }
+
+        rectangleSize /= 2;
+        height *= Mathf.Pow(2, -smoothness);
+        PerformDiamondStepV2(rectangleSize,height);
+    }
+
+    #endregion
+    //---------------
     //Adjusted OGDEV
+    //---------------
+    #region
     private void performDiamondSquare2(float Roughness) 
     { 
         int rectSize = (int)mesh.bounds.size.x;
@@ -202,36 +352,5 @@ public class diamondSquare : MonoBehaviour
             }
         }
     }
-
-    
-    //Diamond Step
-    private void PerformDiamondStep(int x1, int y1, int x2, int y2, int iteration)
-    {
-        float halfRectagleSize = (x2 - x1)/2;
-        if(halfRectagleSize <1){
-            return;
-        }
-        int middleX = x1 + ((x2 - x1) / 2);
-        int middleY = y1 + ((y2 - y1) / 2);
-        heightmap[calculateIndex(middleX, middleY)] = DiamondAverage(x1,y1,x2,y2) + (Random.Range(-halfRectagleSize,halfRectagleSize)*Mathf.Pow(2,-smoothness));
-        PerformSquareStep(middleX, middleY,x1,y1,x2,y2, iteration);
-    }
-
-    //Square Step
-    private void PerformSquareStep(int middleX, int middleY, int x1, int y1, int x2, int y2, int iteration)
-    {
-        int dist = middleX - x1;
-        //set heightmap with same X coordinate
-        heightmap[calculateIndex(middleX,y1)] = SquareAverage(middleX, y1, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        heightmap[calculateIndex(middleX,y2)] = SquareAverage(middleX, y2, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        //set heightmap with same Y coordinate
-        heightmap[calculateIndex(x1,middleY)] = SquareAverage(x1, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-        heightmap[calculateIndex(x2,middleY)]= SquareAverage(x2, middleY, dist) + (Random.Range(-dist, dist) * Mathf.Pow(2, -smoothness));
-
-        iteration++;
-        PerformDiamondStep(x1, y1, middleX, middleY, iteration);
-        PerformDiamondStep(middleX, middleY, x2, y2, iteration);
-        PerformDiamondStep(x1, middleY, middleX, y2, iteration);
-        PerformDiamondStep(middleX, y1, x2, middleY, iteration);
-    }
+    #endregion
 }
