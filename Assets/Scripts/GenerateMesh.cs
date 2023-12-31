@@ -5,12 +5,14 @@ using UnityEngine;
 public class GenerateMesh : MonoBehaviour
 {
     [Header("2^N + 1")]
+    [Range(0,7)]
     public int N;
     private int xSize,ySize;
 
     private Mesh mesh;
     private Vector3[] vertices;
 
+   
 
     // Start is called before the first frame update
     void Awake()

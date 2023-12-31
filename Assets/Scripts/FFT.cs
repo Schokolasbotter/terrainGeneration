@@ -9,7 +9,9 @@ public class FFT : MonoBehaviour
 {
     public Mesh TerrainMesh;
     public Texture2D texture;
-    private Vector3[] originalVertices, displacedVertices;
+    private Vector3[] originalVertices;
+    public Vector3[] heightmap1;
+    public float[] heightmap;
     private Vector2[] uvCoordinates;
     public float filter;
 
@@ -18,51 +20,47 @@ public class FFT : MonoBehaviour
 
     private float squareMeshSize;
 
-    public float heightMult = 1;
+    public float heightMult = 30;
     public float noiseScale;
     public float noiseScale2;
 
     public float[] newVertexHeights;
     // Start is called before the first frame update
+
+    public void regenerateNoiseScale()
+    {
+        noiseScale = Random.Range(1, 3);
+        noiseScale2 = Random.Range(3, 6);
+    }
     void Start()
     {
         TerrainMesh = GetComponent<MeshFilter>().mesh;
+        RebuildHeightMap();
+    }
+    public void RebuildHeightMap()
+    {
         GenerateNoise();
 
         originalVertices = TerrainMesh.vertices;
         uvCoordinates = TerrainMesh.uv;
-        displacedVertices = new Vector3[originalVertices.Length];
-        
-                squareMeshSize = Mathf.Sqrt(TerrainMesh.vertexCount);
+        heightmap1 = new Vector3[originalVertices.Length];
+        heightmap = new float[originalVertices.Length];
 
-                Numerics.Complex[,] complex = FourierTransform();
-                complex = ApplyFilter(complex, filter);
-                Numerics.Complex[,] inversedComplex = ApplyInverseFastFourierTransform(complex);
-                newVertexHeights = ComplexToDouble(inversedComplex);
+        squareMeshSize = Mathf.Sqrt(TerrainMesh.vertexCount);
+
+        Numerics.Complex[,] complex = FourierTransform();
+        complex = ApplyFilter(complex, filter);
+        Numerics.Complex[,] inversedComplex = ApplyInverseFastFourierTransform(complex);
+        newVertexHeights = ComplexToDouble(inversedComplex);
 
 
-                for (int i = 0; i < originalVertices.Length; i++)
-                {
-                    float height = (float)newVertexHeights[i];
-                    displacedVertices[i] = originalVertices[i] + Vector3.up * height * heightMult;
-                }
-                TerrainMesh.vertices = displacedVertices;
-                TerrainMesh.RecalculateNormals();
-        
-        // Create a new material
-        
-    }
+        for (int i = 0; i < originalVertices.Length; i++)
+        {
+            float height = (float)newVertexHeights[i];
+            heightmap1[i] = originalVertices[i] + Vector3.up * height * heightMult;
 
-    private void Update()
-    {
-       // GenerateNoise();
-        /*
-        Material noiseMaterial = new Material(Shader.Find("Standard"));
-        noiseMaterial.SetTexture("_MainTex", texture);
-
-        // Apply the material to the GameObject's Renderer
-        Renderer renderer = GetComponent<Renderer>();
-        renderer.material = noiseMaterial; */
+            heightmap[i] = heightmap1[i].y;
+        }
     }
 
     private void GenerateNoise()
@@ -75,8 +73,13 @@ public class FFT : MonoBehaviour
             {
                 float sample1 = Mathf.PerlinNoise(noiseScale * (float)x/Size,noiseScale * (float)y/Size );
                 float sample2 = Mathf.PerlinNoise(2435.3426f + noiseScale2 * (float)x/Size, 159232.766f + noiseScale2 * (float)y/Size );
-                float sample3 = sample1 * sample2;
-                Color color = new Color(sample3,sample3,sample3);
+                float sample3 = Mathf.PerlinNoise(2435.3426f + 0.5f * (float)x/Size, 159232.766f + 0.5f * (float)y/Size );
+                float combinedSample = (sample1 + sample2 + sample3) / 3.0f;
+                combinedSample = combinedSample * combinedSample * (3.0f - 2.0f * combinedSample); // Contrast adjustment
+                combinedSample = Mathf.Clamp(combinedSample, 0.0f, 1.0f);
+
+
+                Color color = new Color(combinedSample, combinedSample, combinedSample);
                 texture.SetPixel(x, y, color);
             }
         }

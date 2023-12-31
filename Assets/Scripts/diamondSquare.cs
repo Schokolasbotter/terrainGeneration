@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class diamondSquare : MonoBehaviour
 {
-    public float height = 5f;
+    public float height = 30f;
     [Range(0f, 2f)] public float smoothness;
     private float sideSize;
     Mesh mesh;
@@ -130,7 +130,7 @@ public class diamondSquare : MonoBehaviour
     //---------------
     #region
 
-    private void performDiamondSquareV2()
+    public void performDiamondSquareV2()
     {
         //Initial Corners
 
