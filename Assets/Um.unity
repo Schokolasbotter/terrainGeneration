@@ -3439,6 +3439,7 @@ MonoBehaviour:
   sensitivity: 2
   maxYRotation: 360
   moveSpeed: 5
+  UIElement: {fileID: 415950887}
 --- !u!1 &1288252856
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,14 +6,18 @@ public class CameraControl : MonoBehaviour
     public float maxYRotation = 90.0f; // Maximum vertical rotation angle.
     public float moveSpeed = 5.0f; // Camera movement speed.
 
+    public GameObject UIElement;
+    private bool isObjectEnabled = true;
+
     private float rotationX = 0;
     private float rotationY = 0;
 
     void Start()
     {
         // Lock the cursor and hide it.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        // Cursor.visible = false;
+        
     }
 
     void LateUpdate()
@@ -39,5 +43,22 @@ public class CameraControl : MonoBehaviour
         // Move the camera forward/backward.
         Vector3 moveDirection = transform.forward * scrollWheel * moveSpeed;
         transform.Translate(moveDirection, Space.World);
+
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            isObjectEnabled = !isObjectEnabled;
+            UIElement.SetActive(isObjectEnabled);
+
+            if(isObjectEnabled)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+            } else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
     }
 }
