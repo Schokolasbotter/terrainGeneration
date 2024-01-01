@@ -30,7 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnelPower: 2.02
-    - _MapHeight: 30.673304
+    - _MapHeight: 93.571434
     - _NoiseScale: 84
     m_Colors:
     - _FresnelColor: {r: 0, g: 0, b: 0, a: 1}

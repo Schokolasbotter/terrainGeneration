@@ -23,26 +23,24 @@ public class CameraControl : MonoBehaviour
 
     void LateUpdate()
     {
-        // Get the mouse input.
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
-
-        // Rotate the camera horizontally.
         if (!rotationLocked)
         {
+            // Get the mouse input.
+            float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+            float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
+
+            // Rotate the camera horizontally.
             Camera.main.transform.Rotate(0, mouseX, 0);
-        }
 
-        // Calculate the vertical rotation angle.
-        rotationX -= mouseY;
-        rotationY += mouseX;
-        rotationX = Mathf.Clamp(rotationX, -maxYRotation, maxYRotation);
+            // Calculate the vertical rotation angle.
+            rotationX -= mouseY;
+            rotationY += mouseX;
+            rotationX = Mathf.Clamp(rotationX, -maxYRotation, maxYRotation);
 
-        // Rotate the camera vertically.
-        if (!rotationLocked)
-        {
+            // Rotate the camera vertically.     
             Camera.main.transform.rotation = Quaternion.Euler(rotationX, rotationY, 0);
         }
+        
 
         // Get the scroll wheel input.
         float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
