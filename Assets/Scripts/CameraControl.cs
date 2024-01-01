@@ -6,6 +6,9 @@ public class CameraControl : MonoBehaviour
     public float maxYRotation = 90.0f; // Maximum vertical rotation angle.
     public float moveSpeed = 5.0f; // Camera movement speed.
 
+    public GameObject UIElement;
+    private bool isObjectEnabled = true;
+
     private float rotationX = 0;
     private float rotationY = 0;
 
@@ -13,7 +16,8 @@ public class CameraControl : MonoBehaviour
     {
         // Lock the cursor and hide it.
         //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
+        // Cursor.visible = false;
+        
     }
 
     void LateUpdate()
@@ -40,12 +44,21 @@ public class CameraControl : MonoBehaviour
         Vector3 moveDirection = transform.forward * scrollWheel * moveSpeed;
         transform.Translate(moveDirection, Space.World);
 
-        //Get Arrow Key Input
-        Vector2 horizontal;
-        horizontal.x = Input.GetAxis("Horizontal");
-        horizontal.y = Input.GetAxis("Vertical");
-        //Move Camera in Space
-        Vector3 direction = transform.forward * horizontal.y * moveSpeed + transform.right * horizontal.x * moveSpeed;
-        transform.Translate(moveDirection, Space.World);
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            isObjectEnabled = !isObjectEnabled;
+            UIElement.SetActive(isObjectEnabled);
+
+            if(isObjectEnabled)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+            } else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
     }
 }
