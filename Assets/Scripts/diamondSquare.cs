@@ -259,6 +259,7 @@ public class diamondSquare : MonoBehaviour
     public void performDiamondSquareV2()
     {
         //Initial Corners
+        /* Setting Corners is Optional Uncomment to activate
         float h1 = Random.Range(-height, height);
         heightmap[calculateIndex(0, 0)] = h1;
         float h2 = Random.Range(-height, height);
@@ -267,7 +268,7 @@ public class diamondSquare : MonoBehaviour
         heightmap[calculateIndex(0, maximumIndexCoordinate)] = h3;
         float h4 = Random.Range(-height, height);
         heightmap[calculateIndex(maximumIndexCoordinate, maximumIndexCoordinate)] = h4;
-
+        */
         //Redice Height
         float nextHeight = height * Mathf.Pow(2, -smoothness);
 

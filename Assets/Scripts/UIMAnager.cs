@@ -59,7 +59,6 @@ public class UIMAnager : MonoBehaviour
     public void UpdateSmoothness()
     {
         float DSSmoothness = SmoothnessSlider.value;
-        DSSmoothness /= 2;
         SmoothnessSize.text = "Smoothness: " + DSSmoothness.ToString();
 
         dsScript.smoothness = DSSmoothness;
