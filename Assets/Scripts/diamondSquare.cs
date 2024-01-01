@@ -26,9 +26,12 @@ public class diamondSquare : MonoBehaviour
         heightmap = new float[vertices.Length];
 
         //First Version
-        performDiamondSquare();
+        //performDiamondSquare();
+
         //Adjusted OGLDEV
-        performDiamondSquareOGLDEV(smoothness);
+        //performDiamondSquareOGLDEV(smoothness);
+
+        //Second Version
         performDiamondSquareV2();
     }
 
@@ -256,16 +259,19 @@ public class diamondSquare : MonoBehaviour
     public void performDiamondSquareV2()
     {
         //Initial Corners
-
         float h1 = Random.Range(-height, height);
-       //heightmap[calculateIndex(0, 0)] = h1;
+        heightmap[calculateIndex(0, 0)] = h1;
         float h2 = Random.Range(-height, height);
-        //heightmap[calculateIndex(maximumIndexCoordinate, 0)] = h2;
+        heightmap[calculateIndex(maximumIndexCoordinate, 0)] = h2;
         float h3 = Random.Range(-height, height);
-       // heightmap[calculateIndex(0, maximumIndexCoordinate)] = h3;
+        heightmap[calculateIndex(0, maximumIndexCoordinate)] = h3;
         float h4 = Random.Range(-height, height);
-        //heightmap[calculateIndex(maximumIndexCoordinate, maximumIndexCoordinate)] = h4;
+        heightmap[calculateIndex(maximumIndexCoordinate, maximumIndexCoordinate)] = h4;
+
+        //Redice Height
         float nextHeight = height * Mathf.Pow(2, -smoothness);
+
+        //Call Diamond Step
         PerformDiamondStepV2((int)sideSize,nextHeight);
     }
 

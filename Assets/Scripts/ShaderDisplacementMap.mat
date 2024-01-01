@@ -30,8 +30,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnelPower: 2.02
-    - _MapHeight: 28.214285
-    - _NoiseScale: 65
+    - _MapHeight: 0
+    - _NoiseScale: 54
     m_Colors:
     - _FresnelColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
