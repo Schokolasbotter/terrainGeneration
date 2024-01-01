@@ -12,8 +12,8 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         // Lock the cursor and hide it.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
     }
 
     void LateUpdate()
@@ -38,6 +38,14 @@ public class CameraControl : MonoBehaviour
 
         // Move the camera forward/backward.
         Vector3 moveDirection = transform.forward * scrollWheel * moveSpeed;
+        transform.Translate(moveDirection, Space.World);
+
+        //Get Arrow Key Input
+        Vector2 horizontal;
+        horizontal.x = Input.GetAxis("Horizontal");
+        horizontal.y = Input.GetAxis("Vertical");
+        //Move Camera in Space
+        Vector3 direction = transform.forward * horizontal.y * moveSpeed + transform.right * horizontal.x * moveSpeed;
         transform.Translate(moveDirection, Space.World);
     }
 }

@@ -25,6 +25,10 @@ public class diamondSquare : MonoBehaviour
         vertices = mesh.vertices;
         heightmap = new float[vertices.Length];
 
+        //First Version
+        performDiamondSquare();
+        //Adjusted OGLDEV
+        performDiamondSquareOGLDEV(smoothness);
         performDiamondSquareV2();
     }
 
@@ -123,6 +127,125 @@ public class diamondSquare : MonoBehaviour
         }
         averageValue /= valueCounter;
         return averageValue;
+    }
+    #endregion
+    //---------------
+    //Adjusted OGDEV
+    //---------------
+    #region
+    private void performDiamondSquareOGLDEV(float Roughness)
+    {
+        int rectSize = (int)mesh.bounds.size.x;
+        float currentHeight = rectSize / 2.0f;
+        float heightReduce = Mathf.Pow(2.0f, -Roughness);
+
+        //Set Corner Values
+        for (int z = 0; z <= mesh.bounds.size.z; z += rectSize)
+        {
+            for (int x = 0; x <= mesh.bounds.size.x; x += rectSize)
+            {
+                //heightmap[calculateIndex(x, z)].y = Random.Range(-currentHeight, currentHeight);
+            }
+        }
+        int i = 0;
+        while (rectSize > 1)
+        {
+            i++;
+            //DiamondStep
+            DiamondStep(rectSize, currentHeight);
+            //SquareStep
+            SquareStep(rectSize, heightReduce);
+            rectSize /= 2;
+            currentHeight *= heightReduce;
+            //rectSize = 0;
+        }
+    }
+
+    private void DiamondStep(int RectSize, float CurHeight)
+    {
+        int halfRectSize = RectSize / 2;
+        for (int z = 0; z < mesh.bounds.size.z; z += RectSize)
+        {
+            for (int x = 0; x < mesh.bounds.size.x; x += RectSize)
+            {
+                int next_x = (x + RectSize) % (int)mesh.bounds.size.x;
+                int next_z = (z + RectSize) % (int)mesh.bounds.size.z;
+
+                if (next_x < x)
+                {
+                    next_x = (int)mesh.bounds.size.x - 1;
+                }
+
+                if (next_z < z)
+                {
+                    next_z = (int)mesh.bounds.size.z - 1;
+                }
+
+                float topLeft = heightmap[calculateIndex(x, z)];
+                float topRight = heightmap[calculateIndex(next_x, z)];
+                float bottomLeft = heightmap[calculateIndex(x, next_z)];
+                float bottomRight = heightmap[calculateIndex(next_x, next_z)];
+
+                int mid_x = x + halfRectSize;
+                int mid_z = z + halfRectSize;
+
+                float randValue = Random.Range(CurHeight, -CurHeight);
+                float midPoint = (topLeft + topRight + bottomLeft + bottomRight) / 4.0f;
+                heightmap[calculateIndex(mid_x, mid_z)] = midPoint + randValue;
+            }
+        }
+    }
+
+    private void SquareStep(int RectSize, float CurHeight)
+    {
+        int halfRectSize = RectSize / 2;
+
+        for (int z = 0; z < mesh.bounds.size.z; z += RectSize)
+        {
+            for (int x = 0; x < mesh.bounds.size.x; x += RectSize)
+            {
+                int next_x = (x + RectSize) % (int)mesh.bounds.size.x;
+                int next_z = (z + RectSize) % (int)mesh.bounds.size.z;
+
+                int mid_x = x + halfRectSize;
+                int mid_z = z + halfRectSize;
+
+                int prev_mid_x = (x - halfRectSize + (int)mesh.bounds.size.x) % (int)mesh.bounds.size.x;
+                int prev_mid_z = (z - halfRectSize + (int)mesh.bounds.size.z) % (int)mesh.bounds.size.z;
+
+                float CurTopLeft = heightmap[calculateIndex(x, z)];
+                float CurTopRight = heightmap[calculateIndex(next_x, z)];
+                float CurCenter = heightmap[calculateIndex(mid_x, mid_z)];
+                float prevZCenter = heightmap[calculateIndex(mid_x, prev_mid_z)];
+                float curBotLeft = heightmap[calculateIndex(x, next_z)];
+                float prevXCenter = heightmap[calculateIndex(prev_mid_x, mid_z)];
+
+                float CurLeftMid = (CurTopLeft + CurCenter + curBotLeft + prevXCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
+                float CurTopMid = (CurTopLeft + CurCenter + CurTopRight + prevZCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
+
+                heightmap[calculateIndex(mid_x, z)] = CurTopMid;
+                heightmap[calculateIndex(x, mid_z)] = CurLeftMid;
+
+                if (x == 0)
+                {
+                    float nextHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x + halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float prevHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x - halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float nextVert = heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z + halfRectSize) % (int)mesh.bounds.size.z)];
+                    float prevVert = heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z - halfRectSize) % (int)mesh.bounds.size.z)];
+                    float borderAverage = (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);
+                    heightmap[calculateIndex((int)mesh.bounds.size.x, mid_z)] = borderAverage;
+                }
+                if (z == 0)
+                {
+                    float nextHoriz = heightmap[calculateIndex((mid_x + halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float prevHoriz = heightmap[calculateIndex((mid_x - halfRectSize) % (int)mesh.bounds.size.x, z)];
+                    float nextVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z + halfRectSize) % (int)mesh.bounds.size.z)];
+                    float prevVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z - halfRectSize) % (int)mesh.bounds.size.z)];
+                    float borderAverage = (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);
+                    heightmap[calculateIndex(mid_x, (int)mesh.bounds.size.z)] = borderAverage + Random.Range(-CurHeight, CurHeight);
+                }
+            }
+        }
     }
     #endregion
     //---------------
@@ -231,122 +354,5 @@ public class diamondSquare : MonoBehaviour
     }
 
     #endregion
-    //---------------
-    //Adjusted OGDEV
-    //---------------
-    #region
-    private void performDiamondSquare2(float Roughness) 
-    { 
-        int rectSize = (int)mesh.bounds.size.x;
-        float currentHeight = rectSize / 2.0f;
-        float heightReduce = Mathf.Pow(2.0f, -Roughness);
-
-        //Set Corner Values
-        for (int z = 0; z <= mesh.bounds.size.z; z += rectSize)
-        {
-            for (int x = 0; x <= mesh.bounds.size.x; x += rectSize)
-            {
-                //heightmap[calculateIndex(x, z)].y = Random.Range(-currentHeight, currentHeight);
-            }
-        }
-        int i = 0;
-        while (rectSize > 1)
-        {
-            i++;
-            //DiamondStep
-            DiamondStep(rectSize, currentHeight);
-            //SquareStep
-            SquareStep(rectSize, heightReduce);
-            rectSize /= 2;
-            currentHeight *= heightReduce;
-            //rectSize = 0;
-        }
-    }
-
-    private void DiamondStep(int RectSize, float CurHeight)
-    {
-        int halfRectSize = RectSize / 2;
-        for(int z = 0; z < mesh.bounds.size.z; z+= RectSize){
-            for(int x =0; x < mesh.bounds.size.x; x+= RectSize)
-            {
-                int next_x = (x+RectSize)%(int)mesh.bounds.size.x;
-                int next_z = (z+RectSize)%(int)mesh.bounds.size.z;
-
-                if(next_x < x)
-                {
-                    next_x = (int)mesh.bounds.size.x - 1;
-                }
-
-                if (next_z < z)
-                {
-                    next_z = (int)mesh.bounds.size.z - 1;
-                }
-
-                float topLeft = heightmap[calculateIndex(x, z)];
-                float topRight = heightmap[calculateIndex(next_x, z)];
-                float bottomLeft = heightmap[calculateIndex(x, next_z)];
-                float bottomRight = heightmap[calculateIndex(next_x, next_z)];
-
-                int mid_x = x + halfRectSize;
-                int mid_z = z + halfRectSize;
-
-                float randValue = Random.Range(CurHeight, -CurHeight);
-                float midPoint = (topLeft + topRight + bottomLeft + bottomRight) / 4.0f;
-                heightmap[calculateIndex(mid_x, mid_z)] = midPoint + randValue;
-            }
-        }
-    }
-
-    private void SquareStep(int RectSize, float CurHeight)
-    {
-        int halfRectSize = RectSize / 2;
-
-        for (int z = 0; z < mesh.bounds.size.z; z += RectSize)
-        {
-            for (int x = 0; x < mesh.bounds.size.x; x += RectSize)
-            {
-                int next_x = (x + RectSize) % (int)mesh.bounds.size.x;
-                int next_z = (z + RectSize) % (int)mesh.bounds.size.z;
-
-                int mid_x = x + halfRectSize;
-                int mid_z = z + halfRectSize;
-
-                int prev_mid_x = (x-halfRectSize + (int)mesh.bounds.size.x) % (int)mesh.bounds.size.x;
-                int prev_mid_z = (z-halfRectSize + (int)mesh.bounds.size.z) % (int)mesh.bounds.size.z;
-
-                float CurTopLeft = heightmap[calculateIndex(x, z)];
-                float CurTopRight = heightmap[calculateIndex(next_x, z)];
-                float CurCenter = heightmap[calculateIndex(mid_x,mid_z)];
-                float prevZCenter = heightmap[calculateIndex(mid_x, prev_mid_z)];
-                float curBotLeft = heightmap[calculateIndex(x, next_z)];
-                float prevXCenter = heightmap[calculateIndex(prev_mid_x, mid_z)];
-
-                float CurLeftMid = (CurTopLeft + CurCenter + curBotLeft + prevXCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
-                float CurTopMid = (CurTopLeft + CurCenter + CurTopRight + prevZCenter) / 4.0f + Random.Range(-CurHeight, CurHeight);
-
-                heightmap[calculateIndex(mid_x,z)]= CurTopMid;
-                heightmap[calculateIndex(x,mid_z)] = CurLeftMid;
-                
-                if(x == 0)
-                {
-                    float nextHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x + halfRectSize) % (int)mesh.bounds.size.x, z)];
-                    float prevHoriz = heightmap[calculateIndex(((int)mesh.bounds.size.x - halfRectSize)% (int)mesh.bounds.size.x, z)];
-                    float nextVert =  heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z + halfRectSize) % (int)mesh.bounds.size.z)];
-                    float prevVert =  heightmap[calculateIndex((int)mesh.bounds.size.x, (mid_z - halfRectSize) % (int)mesh.bounds.size.z)];
-                    float borderAverage =  (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);                                            
-                    heightmap[calculateIndex((int)mesh.bounds.size.x, mid_z)] = borderAverage;
-                }
-                if(z == 0)
-                {
-                    float nextHoriz = heightmap[calculateIndex((mid_x + halfRectSize) % (int)mesh.bounds.size.x, z)];
-                    float prevHoriz = heightmap[calculateIndex((mid_x - halfRectSize) % (int)mesh.bounds.size.x, z)];
-                    float nextVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z + halfRectSize) % (int)mesh.bounds.size.z)];
-                    float prevVert = heightmap[calculateIndex((int)mesh.bounds.size.x, ((int)mesh.bounds.size.z - halfRectSize) % (int)mesh.bounds.size.z)];
-                    float borderAverage = (nextHoriz + prevHoriz + nextVert + prevVert) / 4.0f + Random.Range(-CurHeight, CurHeight);
-                    heightmap[calculateIndex(mid_x, (int)mesh.bounds.size.z)] = borderAverage + Random.Range(-CurHeight, CurHeight);
-                }
-            }
-        }
-    }
-    #endregion
+    
 }

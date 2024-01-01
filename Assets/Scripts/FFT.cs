@@ -179,7 +179,7 @@ public class FFT : MonoBehaviour
                         //As i (imaginary number) doesnt really exist in unity, we calculate the rest of teh exponent first, then when its added to the second part of the complex number, it is automatically imaginary
                         double exponent = -2f * Mathf.PI * (((x * u) / n)+ ((y*v)/m));
                         Sum += inputData[(int)x,(int) y] * Numerics.Complex.Exp(new Numerics.Complex(0, exponent));
-                        print(Sum);
+                        //print(Sum);
                     }
                 }
                 oComplex[(int)u, (int)v] = Sum/(n*m);
