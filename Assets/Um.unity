@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.39564613, g: 0.39564613, b: 0.39564613, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4909,9 +4909,9 @@ MonoBehaviour:
   texture: {fileID: 0}
   heightmap1: []
   heightmap: []
-  filter: 0.93
-  heightMult: 110.6
-  noiseScale: 2.54638
+  filter: 0.78
+  heightMult: 30
+  noiseScale: 3.42
   noiseScale2: 3.2156
   newVertexHeights: []
 --- !u!114 &1580090770

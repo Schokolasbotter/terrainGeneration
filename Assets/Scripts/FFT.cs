@@ -29,8 +29,8 @@ public class FFT : MonoBehaviour
 
     public void regenerateNoiseScale()
     {
-        noiseScale = Random.Range(1, 3);
-        noiseScale2 = Random.Range(3, 6);
+        noiseScale = Random.value *3 ;
+        noiseScale2 = Random.value * 3 +3;
     }
     void Start()
     {
@@ -39,8 +39,9 @@ public class FFT : MonoBehaviour
     }
     public void RebuildHeightMap()
     {
+        print(heightMult);
         GenerateNoise();
-
+        print("Changint");
         originalVertices = TerrainMesh.vertices;
         uvCoordinates = TerrainMesh.uv;
         heightmap1 = new Vector3[originalVertices.Length];
@@ -57,9 +58,9 @@ public class FFT : MonoBehaviour
         for (int i = 0; i < originalVertices.Length; i++)
         {
             float height = (float)newVertexHeights[i];
-            heightmap1[i] = originalVertices[i] + Vector3.up * height * heightMult;
+          //  heightmap1[i] = originalVertices[i] + Vector3.up * height * heightMult;
 
-            heightmap[i] = heightmap1[i].y;
+            heightmap[i] = (float)newVertexHeights[i] * heightMult;
         }
     }
 

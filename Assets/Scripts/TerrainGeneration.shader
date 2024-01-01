@@ -130,7 +130,7 @@ Shader "Unlit/TerrainGeneration"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-            float fresnel = pow(1.0 - max(dot(normalize(i.viewDir), normalize(i.worldNormal)), 0.0), _FresnelPower);
+            float fresnel = abs(dot(normalize(i.worldNormal), float3(0, 1, 0)));
 
             // Blend Fresnel color with texture color
 
