@@ -39,9 +39,8 @@ public class FFT : MonoBehaviour
     }
     public void RebuildHeightMap()
     {
-        print(heightMult);
+        TerrainMesh = GetComponent<MeshFilter>().mesh;
         GenerateNoise();
-        print("Changint");
         originalVertices = TerrainMesh.vertices;
         uvCoordinates = TerrainMesh.uv;
         heightmap1 = new Vector3[originalVertices.Length];
@@ -58,8 +57,6 @@ public class FFT : MonoBehaviour
         for (int i = 0; i < originalVertices.Length; i++)
         {
             float height = (float)newVertexHeights[i];
-          //  heightmap1[i] = originalVertices[i] + Vector3.up * height * heightMult;
-
             heightmap[i] = (float)newVertexHeights[i] * heightMult;
         }
     }
@@ -96,7 +93,6 @@ public class FFT : MonoBehaviour
         //for each pixel in the image, we get the greyscale value set to a value called 'intensity'
         //Then inside that position in the 2D array, we create a new complex number with the intensity as the double, and the imaginary number = 0
 
-        //this function doesnt work, mismatch between uv and size of mesh
         for (int I = 0, X = 0; X < squareMeshSize; X++)
         {
             for (int Y = 0; Y < squareMeshSize; Y++, I++)
@@ -151,7 +147,7 @@ public class FFT : MonoBehaviour
         (the double summation is represented with a nested loop)
         
 
-        Since this is a direct implementation of the DFT algorithm, the time complexity is O(n) 
+        Since this is a direct implementation of the DFT algorithm, the time complexity is O(n^4) 
 
 
         */
@@ -180,7 +176,6 @@ public class FFT : MonoBehaviour
                         //As i (imaginary number) doesnt really exist in unity, we calculate the rest of teh exponent first, then when its added to the second part of the complex number, it is automatically imaginary
                         double exponent = -2f * Mathf.PI * (((x * u) / n)+ ((y*v)/m));
                         Sum += inputData[(int)x,(int) y] * Numerics.Complex.Exp(new Numerics.Complex(0, exponent));
-                        //print(Sum);
                     }
                 }
                 oComplex[(int)u, (int)v] = Sum/(n*m);

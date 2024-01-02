@@ -27,6 +27,7 @@ public class meshControl : MonoBehaviour
     // Update is called once per frame
     public void applySetting()
     {
+        mesh = GetComponent<MeshFilter>().mesh;
         shader.enabled = false;
         Vector3[] vertices = mesh.vertices;
         switch(choice)

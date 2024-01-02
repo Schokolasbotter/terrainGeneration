@@ -12,17 +12,15 @@ public class GenerateMesh : MonoBehaviour
     private Mesh mesh;
     private Vector3[] vertices;
 
-   
-
     // Start is called before the first frame update
     void Awake()
     {
-        xSize = ySize = (int)Mathf.Pow(2,N)+1;
         Generate();
     }
 
-    private void Generate()
+    public void Generate()
     {
+        xSize = ySize = (int)Mathf.Pow(2, N) + 1;
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         mesh.name = "Plane2";
 

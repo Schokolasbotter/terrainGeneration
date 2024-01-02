@@ -45,6 +45,7 @@ public class UIMAnager : MonoBehaviour
         int n = (int)Mathf.Pow(2f, MeshSizeSlider.value) + 1;
         MeshSize.text = "Mesh Size: " + n.ToString() + "x" + n.ToString();
         generateMesh.N = (int)MeshSizeSlider.value;
+
     }
 
     public void UpdateHeight()
@@ -55,6 +56,7 @@ public class UIMAnager : MonoBehaviour
         fftScript.heightMult = DSHeight;
         shaderScript.UpdateHeight(DSHeight);
     }
+
 
     public void UpdateSmoothness()
     {
@@ -116,15 +118,9 @@ public class UIMAnager : MonoBehaviour
 
     public void GenerateNewSet()
     {
-        switch (meshControl.choice)
-        {
-            case meshControl.meshChoice.DiamondSquare:
-                dsScript.performDiamondSquareV2();
-                break;
-            case meshControl.meshChoice.FourrierTransform:
-                fftScript.RebuildHeightMap();
-                break;
-
-        }
+        generateMesh.Generate();
+        dsScript.performDiamondSquareV2();
+        fftScript.RebuildHeightMap();
+        meshControl.applySetting();
     }
 }

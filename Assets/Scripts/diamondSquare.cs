@@ -258,6 +258,11 @@ public class diamondSquare : MonoBehaviour
 
     public void performDiamondSquareV2()
     {
+        mesh = GetComponent<MeshFilter>().mesh;
+        sideSize = Mathf.Sqrt(mesh.vertices.Length);
+        maximumIndexCoordinate = (int)sideSize - 1;
+        vertices = mesh.vertices;
+        heightmap = new float[vertices.Length];
         //Initial Corners
         /* Setting Corners is Optional Uncomment to activate
         float h1 = Random.Range(-height, height);

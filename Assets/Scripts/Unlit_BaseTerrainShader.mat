@@ -29,10 +29,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FresnelPower: 3.16
+    - _FresnelPower: 2.66
     - _Threshold: 0.5
     m_Colors:
-    - _FresnelColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FresnelColor: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
     - _GrassColor: {r: 0, g: 0.5, b: 0, a: 1}
     - _RockColor: {r: 0.4, g: 0.5, b: 0.45, a: 1}
   m_BuildTextureStacks: []

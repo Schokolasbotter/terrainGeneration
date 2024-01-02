@@ -3,7 +3,7 @@ Shader "Unlit/BaseTerrainShader"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
-        _FresnelColor("Fresnel Color", Color) = (1,1,1,1)
+        _FresnelColor("Fresnel Color", Color) = (0,0,0,1)
         _FresnelPower("Fresnel Power", Float) = 1.0
     }
         SubShader
@@ -55,19 +55,22 @@ Shader "Unlit/BaseTerrainShader"
 
                 fixed4 frag(v2f i) : SV_Target
                 {
-                fixed4 col = tex2D(_MainTex, i.uv);
+                    fixed4 col = tex2D(_MainTex, i.uv);
+
                 // Calculate Fresnel effect
-                float fresnel = 1.0 - abs(dot(normalize(i.worldNormal), float3(0, 1, 0)));
+                float fresnel = pow(abs(dot(normalize(i.worldNormal), float3(0, 1, 0))), _FresnelPower);
 
                 // Blend Fresnel color with texture color
-                
-                col = lerp(_FresnelColor, col, fresnel);
+                col = lerp(col, _FresnelColor, fresnel);
+
 
                 // Apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
 
                 return col;
-            }
+                }
+
+            
             ENDCG
         }
         }
